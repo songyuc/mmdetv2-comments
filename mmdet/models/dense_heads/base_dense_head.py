@@ -332,6 +332,7 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
             loss_inputs = outs + (gt_bboxes, img_metas)
         else:
             loss_inputs = outs + (gt_bboxes, gt_labels, img_metas)
+        # 调用child-head自身的loss方法 (self.loss是抽象方法)
         losses = self.loss(*loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore)
         if proposal_cfg is None:
             return losses
