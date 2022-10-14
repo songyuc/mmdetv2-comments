@@ -2,6 +2,3 @@
 -r requirements/optional.txt
 -r requirements/runtime.txt
 -r requirements/tests.txt
-Sphinx==5.1.1
-recommonmark==0.7.1
-sphinx-markdown-tables==0.0.17
