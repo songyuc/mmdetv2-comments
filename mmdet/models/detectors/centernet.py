@@ -90,6 +90,7 @@ class CenterNet(SingleStageDetector):
             wh_preds[0] = (wh_preds[0][0:1] +
                            flip_tensor(wh_preds[0][1:2], flip_direction)) / 2
 
+            # bbox解码和还原
             bbox_list = self.bbox_head.get_bboxes(
                 center_heatmap_preds,
                 wh_preds, [offset_preds[0][0:1]],

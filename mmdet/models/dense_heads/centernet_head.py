@@ -93,10 +93,11 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
             offset_preds (List[Tensor]): offset predicts for all levels, the
                channels number is 2.
         """
+        # 多尺度特征图，一个一个迭代进行 forward_single前向运算
         return multi_apply(self.forward_single, feats)
 
     def forward_single(self, feat):
-        """Forward feature of a single level.
+        """Forward feature of a single level. 单尺度前向运算
 
         Args:
             feat (Tensor): Feature of a single level.
@@ -122,6 +123,11 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
              img_metas,
              gt_bboxes_ignore=None):
         """Compute losses of the head.
+        1.生成anchor-free需要的points
+        2.利用 gt_bbox对特征图或者anchor计算其正负和忽略样本属性
+        3.进行正负样本采样
+        4.对 gt_bbox进行bbox编码
+        5.loss计算，并返回
 
         Args:
             center_heatmap_preds (list[Tensor]): center predict heatmaps for
@@ -257,6 +263,9 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
                    rescale=True,
                    with_nms=False):
         """Transform network output for a batch into bbox predictions.
+        1 生成anchor-base需要的anchor或者anchor-free需要的points
+        2 遍历每个输出层，遍历batch内部的每张图片，对每张图片先提取指定个数的预测结果，缓解后面后处理压力；对保留的位置进行bbox解码和还原到原图尺度
+        3 后处理
 
         Args:
             center_heatmap_preds (list[Tensor]): Center predict heatmaps for
