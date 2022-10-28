@@ -192,6 +192,7 @@ def build_dataloader(dataset,
         warnings.warn('persistent_workers is invalid because your pytorch '
                       'version is lower than 1.7.0')
 
+    # 初始化 data_loader，内部会初始化GroupSampler
     data_loader = DataLoader(
         dataset,
         batch_size=batch_size,

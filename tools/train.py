@@ -182,12 +182,13 @@ def main():
     # init the logger before other steps
     timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
     log_file = osp.join(cfg.work_dir, f'{timestamp}.log')
-    # 3.初始化 logger
+    # 2.初始化 logger
     logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
 
     # init the meta dict to record some important information such as
     # environment info and seed, which will be logged
     meta = dict()
+    # 4.收集运行环境并且打印，方便排查硬件和软件相关问题
     # log env info
     env_info_dict = collect_env()
     env_info = '\n'.join([(f'{k}: {v}') for k, v in env_info_dict.items()])
@@ -211,6 +212,7 @@ def main():
     meta['seed'] = seed
     meta['exp_name'] = osp.basename(args.config)
 
+    # 5.初始化检测器
     model = build_detector(
         cfg.model,
         train_cfg=cfg.get('train_cfg'),
