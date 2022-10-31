@@ -1,0 +1,58 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+participant "loss()" as loss
+participant "<color #ed5356>get_anchors()</color>" as get_anchors
+loss -> get_anchors: 调用<b><color #ed5356>get_anchors()</color></b>\n得到默认anchors列表
+rnote over get_anchors #eea2a3
+先计算多尺度特征图上每个特征点位置的
+anchor
+<b>L188: </b>self.prior_generator.grid_priors()
+endrnote
+rnote over get_anchors #eea2a3
+然后再计算有效像素点anchor标志（因为在
+组织batch时候有些图片会进行左上角
+padding，这部分像素人为加的，不需要考虑
+anchor）
+<b>L195: </b>self.prior_generator.valid_flags()
+endrnote
+rnote over loss #eea2a3
+获得默认anchor列表
+endrnote
+participant "  <color #f5810c>get_targets()</color>  " as get_targets
+loss -> get_targets: 基于anchors、gt-bboxes和其他必备信息调用\n<b><color #f5810c>get_targets()函数</color></b>计算每个预测分支对应的targets
+participant "<color #097ce8>_get_targets_single()</color>" as get_targets_single
+rnote over get_targets #f5810c
+调用"multi_apply(_get_targets_single)"
+函数对每张图片单独计算 target
+endrnote
+group <color #f5810c>L366: multi_apply(self._get_targets_single,...)</color>
+    get_targets -> get_targets_single
+    rnote over get_targets_single #accbe8
+    **L247: ** self.assigner.assign()
+    endrnote
+    rnote over get_targets_single #accbe8
+    **L250: ** self.sampler.sample()
+    endrnote
+    rnote over get_targets_single #accbe8
+    **L265: **self.bbox_coder.encode()
+    endrnote
+end
+rnote over loss
+在得到targets后,调用<color #6b08c7>loss_single()</color>计算每个输出尺度
+的loss值,在每个尺度中获得各个分支的loss值
+endrnote
+participant "<color #6b08c7>loss_single()</color>" as loss_single
+group <b>L510: </b>multi_apply(\n\tself.loss_single(),...)
+    loss -> loss_single
+    rnote over loss_single #a683c7
+    **L433: ** self.loss_cls()
+    endrnote
+    rnote over loss_single #a683c7
+    **L445: ** self.loss_bbox()
+    endrnote
+end
+rnote over loss
+**L520: ** return loss in dict
+endrnote
+@enduml

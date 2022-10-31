@@ -1,0 +1,34 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+
+rnote over "mmcv/runner\n/epoch_bashed_runner.py"
+EpochBasedRunner.train():
+⇒ <b>F248:</b>
+    self.run_iter(..., train_mode=True, ...)
+⇒ self.model.train_step
+endrnote
+"mmcv/runner\n/epoch_bashed_runner.py" -> "mmcv/parallel\n/data_parallel.py"
+rnote over "mmcv/parallel\n/data_parallel.py"
+MMDataParallel
+.train_step()
+endrnote
+"mmcv/parallel\n/data_parallel.py" -> "mmdet/models\n/detectors/base.py"
+rnote over "mmdet/models\n/detectors/base.py"
+    BaseDetector.train_step()
+    ⇒ <b>F248:</b> self(**data)
+    ⇒ BaseDetector.forward()
+    ⇒ <b>F172:</b> self.forward_train()
+endrnote
+"mmdet/models\n/detectors/base.py" -> "mmdet/models/detectors\n/single_stage.py": super(SingleStageDetector, ...)\n.forward_train
+rnote over "mmdet/models/detectors\n/single_stage.py"
+    SingleStageDetector.forward_train()
+    ⇒ <b>F83:</b>
+    self.bbox_head.forward_train()
+endrnote
+"mmdet/models/detectors\n/single_stage.py" -> "mmdet/models\n/detectors/base.py"
+rnote over "mmdet/models\n/detectors/base.py"
+**L249:** BaseDetector.
+_parse_losses()
+endrnote
+@enduml
